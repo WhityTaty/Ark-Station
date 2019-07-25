@@ -16,13 +16,11 @@ var/list/control_rods = list()
 	var/health = 200
 	var/load = 0
 	var/nocontrol = 0
-	var/console_tag
 
 
 
 /obj/machinery/control_rod/New()
 	..()
-	console_tag = control_rods.len + 1
 	control_rods += src
 
 

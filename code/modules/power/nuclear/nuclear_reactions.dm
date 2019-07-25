@@ -23,7 +23,7 @@ var/list/nuclear_reactions
 	required_rads = 0
 	heat_production = 1
 	radiation = 3
-	products = list("radioactive_waste" = 0.05, "nuclear waste" = 0.95)
+	products = list("radioactive waste" = 0.05, "nuclear waste" = 0.95)
 
 /decl/nuclear_reaction/radioactive_waste_decay
 	substance = "radioactive waste"
@@ -34,8 +34,8 @@ var/list/nuclear_reactions
 
 /decl/nuclear_reaction/Pu239_chain
 	substance = "Pu239"
-	required_rads = 15
-	heat_production = 12
+	required_rads = 7
+	heat_production = 15
 	radiation = 20
 	products = list("radioactive waste" = 0.6, "nuclear waste" = 0.4)
 

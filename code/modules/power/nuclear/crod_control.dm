@@ -49,7 +49,7 @@
 		"len" = R.len,
 		"targ" = R.target,
 		"broken" = R.nocontrol,
-		"tag" = R.console_tag
+		"tag" = "\ref[R]"
 		)))
 
 	data["rods"] = sortByKey(rodlist, "name")
@@ -73,13 +73,9 @@
 
 /datum/nano_module/rcontrol/Topic(href, href_list)
 	if(href_list["settarg"])
-		var/ctag = 0
-		ctag = (href_list["settarg"])
-		var/new_val = (input("Enter new target length", "Setting new length", 0) as num)
-		for(var/obj/machinery/control_rod/Rd in control_rods)
-			if(Rd.console_tag == ctag)
-				Rd.target = Clamp(new_val, 0, 4)
-				break
+		var/obj/machinery/control_rod/Rd = locate((href_list["settarg"]))
+		var/new_val = (input("Enter new target length", "Setting new length", Rd.target) as num)
+		Rd.target = Clamp(new_val, 0, 4)
 
 	if( href_list["setall"] )
 		var/new_overall = (input("Enter new overall length", "Setting new length", 0) as num)

@@ -84,6 +84,10 @@ var/list/autodocs = list()
 		else
 			icon_state = "autodoc"
 			update_use_power(idle_power_usage)
+	else
+		update_use_power(idle_power_usage)
+		icon_state = "autodoc_open"
+
 
 /obj/machinery/autodoc/proc/defib()
 	var/obj/item/organ/internal/heart/heart = occupant.internal_organs_by_name[BP_HEART]
@@ -414,6 +418,11 @@ var/list/autodocs = list()
 	..()
 	auto = new(src)
 
+
+/obj/item/weapon/stock_parts/circuitboard/autodoc_control
+	name = T_BOARD("Autodoc console")
+	build_path = /obj/machinery/computer/autodoc_console
+	origin_tech = list(TECH_DATA = 4, TECH_ENGINEERING = 3, TECH_POWER = 5)
 
 /obj/machinery/computer/autodoc_console/Destroy()
 	qdel(auto)

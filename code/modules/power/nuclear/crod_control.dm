@@ -13,6 +13,7 @@
 	C =  new(src)
 	C.id_tag = id_tag
 
+
 /obj/machinery/computer/rod_control/Destroy()
 	qdel(C)
 	C = null
@@ -100,3 +101,9 @@
 
 /obj/machinery/computer/rod_control/setupexample
 	id_tag = "Chernobyl"
+
+
+/obj/item/weapon/stock_parts/circuitboard/reactor_control_console
+	name = T_BOARD("Reactor control")
+	build_path = /obj/machinery/computer/rod_control
+	origin_tech = list(TECH_DATA = 4, TECH_ENGINEERING = 3, TECH_POWER = 5)

@@ -23,6 +23,7 @@ var/list/autodocs = list()
 	var/obj/item/Stor_autodoc = null
 	var/datum/nano_module/autodoc_console/console
 	var/obj/machinery/autodoc_loader/connected_loa
+	var/list/operating_limbs = list()
 	//It uses power
 	use_power = 1
 	idle_power_usage = 15
@@ -109,6 +110,7 @@ var/list/autodocs = list()
 	operating = 1
 	if(Org in organs_ext)
 		var/obj/item/organ/external/O = Org
+		operating_limbs.Add(O)
 		switch(opname)
 			if("Heal")
 				while (O.damage > 0)
@@ -195,11 +197,14 @@ var/list/autodocs = list()
 					if(!(I in permitted))
 						occupant.remove_implant(I, TRUE, O)
 
+		operating_limbs.Remove(O)
+
 	else if(!(Org in organs_ext) && Org.name != "brain")
 		var/obj/item/organ/internal/O = Org
 		var/obj/item/organ/external/P = null
 		if(O.parent_organ && O.parent_organ in typesof(/obj/item/organ/external))
 			P = O.parent_organ
+			operating_limbs.Add(P)
 		switch(opname)
 			if("Heal")
 				if(!O.surface_accessible)
@@ -233,13 +238,14 @@ var/list/autodocs = list()
 				P.take_external_damage(rand(5,13), used_weapon = /obj/item/weapon/scalpel)
 				occupant.custom_pain("[src.name] removes one of your organs",rand(30,40),affecting = O)
 
-
+		operating_limbs.Remove(P)
 		O.owner.update_body(1)
 	else if(Org.name == "brain")
 		var/obj/item/organ/internal/O = Org
 		var/obj/item/organ/external/P = null
 		if(O.parent_organ && O.parent_organ in typesof(/obj/item/organ/external))
 			P = O.parent_organ
+			operating_limbs.Add(P)
 		switch(opname)
 			if("completeheal")
 				P.take_external_damage(rand(4,10), used_weapon = /obj/item/weapon/scalpel)
@@ -253,14 +259,15 @@ var/list/autodocs = list()
 			if("MMI")
 				sleep(20)
 
-
+		operating_limbs.Remove(P)
 		O.owner.update_body(1)
 
 
 	occupant.update_body()
 	occupant.updatehealth()
 	occupant.UpdateDamageIcon()
-	operating = 0
+	if(!operating_limbs.len)
+		operating = 0
 
 
 /obj/machinery/autodoc/verb/eject()

@@ -143,7 +143,7 @@ var/list/nrods = list()
 		var/chamb_temp = environment.temperature
 		if (rodtemp > chamb_temp)
 			environment.add_thermal_energy((rodtemp-chamb_temp)*ratio*1200)
-			rodtemp -= (rodtemp-chamb_temp) * ratio / 8
+			rodtemp -= (rodtemp-chamb_temp) * ratio / 12
 
 
 	else
@@ -215,8 +215,8 @@ var/list/nrods = list()
 			var/cur_reaction_type = pick(possible_reactions)
 			var/decl/nuclear_reaction/cur_reaction = new cur_reaction_type
 			var/max_num_reactants = 0
-			if((cur_reaction.required_rads > 0) && (cur_reaction.radiation > 10) && (own_rads < 20))
-				own_rads = (rand(1899, 2101) / 100)
+			if((cur_reaction.required_rads > 0) && (cur_reaction.radiation > 10) && (own_rads < 60) && (rodtemp < 3000))
+				own_rads += (rand(1899, 2101) / 100)
 			if(reaction_rads < cur_reaction.required_rads)
 				possible_reactions -= cur_reaction.type
 				continue
@@ -241,8 +241,8 @@ var/list/nrods = list()
 				reactants[cur_reaction.substance] = 0
 
 			if((amount_reacting * cur_reaction.heat_production * 40) < 5000)
-				if(((rodtemp + amount_reacting * cur_reaction.heat_production * 320) < 3000) || ((amount_reacting * cur_reaction.heat_production * 320) < 250))
-					rodtemp += amount_reacting * cur_reaction.heat_production * 320
+				if(((rodtemp + amount_reacting * cur_reaction.heat_production * 360) < 3000) || ((amount_reacting * cur_reaction.heat_production * 320) < 250))
+					rodtemp += amount_reacting * cur_reaction.heat_production * 360
 				else
 					if(((rodtemp + amount_reacting * cur_reaction.heat_production * 100) < 4000) || ((amount_reacting * cur_reaction.heat_production * 100) < 200))
 						rodtemp += amount_reacting * cur_reaction.heat_production * 100

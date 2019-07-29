@@ -1,3 +1,21 @@
+/datum/computer_file/program/reactor_control
+	filename = "Reactor montior"
+	filedesc = "Reactor monitoring software"
+	nanomodule_path = /datum/nano_module/rcon
+	program_icon_state = "generic"
+	program_key_state = "rd_key"
+	program_menu_icon = "power"
+	extended_desc = "A quite out of date reactor monitoring software"
+	requires_ntnet = 1
+	network_destination = "reactor monitoring system"
+	requires_ntnet_feature = NTNET_SYSTEMCONTROL
+	usage_flags = PROGRAM_LAPTOP | PROGRAM_CONSOLE
+	size = 23
+	category = PROG_ENG
+
+
+
+
 /obj/machinery/computer/reactor_control
 	name = "Reactor monitor computer"
 	icon_keyboard = "rd_key"

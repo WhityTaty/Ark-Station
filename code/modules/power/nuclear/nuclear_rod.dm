@@ -23,7 +23,7 @@ var/list/nrods = list()
 	var/obj/item/weapon/nuclearfuel/rod/F = null
 	var/list/possible_reactions = new /list(0)
 
-/obj/machinery/power/nuclear_rod/New()  // òóò âñå ïîíÿòíî
+/obj/machinery/power/nuclear_rod/New()
 	..()
 	nrods += src
 
@@ -39,7 +39,7 @@ var/list/nrods = list()
 		return 1
 
 
-/obj/machinery/power/nuclear_rod/attack_hand(mob/user)   //âûíèìàåì ñòåðæåíü
+/obj/machinery/power/nuclear_rod/attack_hand(mob/user)   //Removing the assembly.
 	add_fingerprint(user)
 	if(reactants.len && do_after(user, 30,src) && rodtemp < 1000)
 
@@ -48,7 +48,7 @@ var/list/nrods = list()
 		reactants = list()
 
 
-/obj/machinery/power/nuclear_rod/attackby(obj/item/weapon/W, mob/user)  // òóò ó íàñ ðåàêöèÿ íà èíñòðóìåíòû
+/obj/machinery/power/nuclear_rod/attackby(obj/item/weapon/W, mob/user)  //Interaction with tools
 	if(rodtemp < 2000)
 		if(!broken)
 			src.add_fingerprint(user)
@@ -112,7 +112,7 @@ var/list/nrods = list()
 
 
 
-/obj/machinery/power/nuclear_rod/proc/check_state()   // ×òîáû íå ïèñàòü â Ïðîöåññ
+/obj/machinery/power/nuclear_rod/proc/check_state()   // Well, this is kinda ugly, but at least it works
 	if (rodtemp > 5000)
 		integrity -= (rodtemp - 5000)/10
 	if (integrity <= 0 && broken == 0)
@@ -125,7 +125,7 @@ var/list/nrods = list()
 		own_rads = 2000
 
 
-/obj/machinery/power/nuclear_rod/Process()     // îáëó÷åíèå è íàãðåâ àòìîñà (â îáîèõ ñìûñëàõ, ïðèâåò àíòàãàì) + ïðîêè
+/obj/machinery/power/nuclear_rod/Process()     // Here is main purpouse of the rod - heating and radiating.
 	React()
 	if(rodtemp < 0)
 		rodtemp = 0
@@ -147,7 +147,7 @@ var/list/nrods = list()
 
 
 	else
-		SSradiation.radiate(src, round (own_rads * sealcoeff))    // â ïðèíöèïå, ìîæíî ñòàâèòü ëþáîé
+		SSradiation.radiate(src, round (own_rads * sealcoeff))
 	own_rads = own_rads/raddecay*100
 	if(own_rads > 2500)
 		own_rads += own_rads/raddecay*10
@@ -181,7 +181,7 @@ var/list/nrods = list()
 
 
 
-/obj/machinery/power/nuclear_rod/proc/AddReact(var/name, var/quantity = 1)  //????? ??? ??????
+/obj/machinery/power/nuclear_rod/proc/AddReact(var/name, var/quantity = 1)  //Just put reactants back in rod.
 	if(name in reactants)
 		reactants[name] += quantity
 	else
@@ -189,7 +189,7 @@ var/list/nrods = list()
 		reactants[name] = quantity
 
 
-/obj/machinery/power/nuclear_rod/proc/React()
+/obj/machinery/power/nuclear_rod/proc/React() //This proc is quite baggy, so not be suprised by some strange shit, that certanly WILL happen, if you do not fix it.
 	var/repeats = 0
 	if((SSradiation.get_rads_at_turf(get_turf(src)) - own_rads) > 0)
 		reaction_rads += SSradiation.get_rads_at_turf(get_turf(src)) - own_rads
@@ -199,7 +199,7 @@ var/list/nrods = list()
 	if(reactants.len)
 		var/list/produced_reactants = new /list(0)
 		for(var/p_reaction_type in subtypesof(/decl/nuclear_reaction))
-			if(repeats > 60)
+			if(repeats > 720)
 				break
 			repeats += 1
 			var/decl/nuclear_reaction/p_reaction = new p_reaction_type
@@ -208,12 +208,14 @@ var/list/nrods = list()
 			if(reactants[p_reaction.substance] && reaction_rads >= p_reaction.required_rads)
 				possible_reactions += p_reaction.type
 		repeats = 0
-		while(possible_reactions.len)
-			if(repeats > 40)
-				break
-			repeats += 1                 //? ?????? ??? ??????? ??????
+		while(possible_reactions.len) //I added repeats because of infinite loop ussue. Well, this solution is better than nothing
 			var/cur_reaction_type = pick(possible_reactions)
 			var/decl/nuclear_reaction/cur_reaction = new cur_reaction_type
+			if(repeats > 360)
+				if((cur_reaction.required_rads > 0) && (cur_reaction.radiation > 10) && (own_rads < 30))
+					own_rads += (rand(1899, 2101) / 100)
+				break
+			repeats += 1
 			var/max_num_reactants = 0
 			if((cur_reaction.required_rads > 0) && (cur_reaction.radiation > 10) && (own_rads < 20))
 				own_rads = (rand(1899, 2101) / 100)
@@ -221,7 +223,7 @@ var/list/nrods = list()
 				possible_reactions -= cur_reaction.type
 				continue
 
-			if(reactants[cur_reaction.substance] > 0.01)  //?O?????u?t?u?|?u?~?y?u ?{???|?y???u?????r?p ?r?????????p?u?}???s?? ?r ???u?p?{???y??
+			if(reactants[cur_reaction.substance] > 0.000001)  //To eliminate too "weak" reactions
 				if(cur_reaction.required_rads > 0)
 					max_num_reactants = (1 + reaction_rads/cur_reaction.required_rads) * reactants[cur_reaction.substance] / 80000
 				else
@@ -234,15 +236,15 @@ var/list/nrods = list()
 
 			var/amount_reacting = rand(max_num_reactants * 0.9, max_num_reactants)
 
-			if( reactants[cur_reaction.substance] - amount_reacting >= 0 )  //?T?q?y???p?u?} ?y?x ?????y???{?p ???u?p?{???p?~?????r
+			if( reactants[cur_reaction.substance] - amount_reacting >= 0 )  //Sometimes it happens
 				reactants[cur_reaction.substance] -= amount_reacting
 			else
 				amount_reacting = reactants[cur_reaction.substance]
 				reactants[cur_reaction.substance] = 0
 
-			if((amount_reacting * cur_reaction.heat_production * 40) < 5000)
-				if(((rodtemp + amount_reacting * cur_reaction.heat_production * REACT_HEAT) < 3000) || ((amount_reacting * cur_reaction.heat_production * 320) < 250))
-					rodtemp += amount_reacting * cur_reaction.heat_production * REACT_HEAT
+			if((amount_reacting * cur_reaction.heat_production * 40) < 5000) //Change coefficients to configure the rod thermal output. DO NOT forget to doblicate it into if operator.
+				if(((rodtemp + amount_reacting * cur_reaction.heat_production * 320) < 3000) || ((amount_reacting * cur_reaction.heat_production * 320) < 250))
+					rodtemp += amount_reacting * cur_reaction.heat_production * 320
 				else
 					if(((rodtemp + amount_reacting * cur_reaction.heat_production * 100) < 4000) || ((amount_reacting * cur_reaction.heat_production * 100) < 200))
 						rodtemp += amount_reacting * cur_reaction.heat_production * 100
@@ -251,15 +253,15 @@ var/list/nrods = list()
 			else
 				break
 
-			if(own_rads < 300)
+			if(own_rads < 300) //Same as above, but with radiation.
 				own_rads += amount_reacting * cur_reaction.radiation * 65
 			else if(own_rads < 1000)
 				own_rads += amount_reacting * cur_reaction.radiation * 30
 			else if(own_rads < 5000)
 				own_rads += amount_reacting * cur_reaction.radiation * 10
 			var/innerrep = 0
-			for(var/pr_reactant in cur_reaction.products)   //?I ?t???q?p?r?|???u?} ???????t???{???? ???u?p?{???y?y
-				if(innerrep > 60)
+			for(var/pr_reactant in cur_reaction.products)   //Well, this code is mostly copied from R-ust and chrmistry sub, you can look there for better explanations
+				if(innerrep > 360)
 					break
 					break
 				innerrep += 1
@@ -275,10 +277,10 @@ var/list/nrods = list()
 			possible_reactions -= cur_reaction.type
 		repeats = 0
 		for(var/prreactant in produced_reactants)
-			if(repeats > 100)
+			if(repeats > 2500)
 				break
 			repeats += 1
-			AddReact(prreactant, produced_reactants[prreactant])  //?p ???u???u???? ?r???u ???????y?x?r?u?t?u?~?~???u ?y?t?u?? ???q???p???~?? ?r ???u?{???p?~????
+			AddReact(prreactant, produced_reactants[prreactant])  //Look at AddReact() for details
 	return 1
 
 

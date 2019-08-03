@@ -141,6 +141,23 @@
 	else
 		audible_message(message, checkghosts = check_ghosts)
 
+/mob/living/proc/try_emote(var/message)
+	if((usr && stat) || (!use_me && usr == src))
+		to_chat(src, "You are unable to emote.")
+		return
+	if(!message)
+		return
+
+	message = format_emote(src, message)
+
+	if(prob(50))
+		message += "<span class='good'> Успех!</span>"
+	else
+		message += "<span class='danger'> Провал!</span>"
+
+	visible_message(message)
+	log_emote("[name]/[key] : [message]")
+
 // Specific mob type exceptions below.
 /mob/living/silicon/ai/emote(var/act, var/type, var/message)
 	var/obj/machinery/hologram/holopad/T = src.holo

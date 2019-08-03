@@ -192,6 +192,8 @@ proc/get_radio_key_from_channel(var/channel)
 		return emote(copytext(message,2))
 	if(prefix == get_prefix_key(/decl/prefix/visible_emote))
 		return custom_emote(1, copytext(message,2))
+	if(prefix == get_prefix_key(/decl/prefix/try_emote))
+		return try_emote(copytext(message,2))
 
 	//parse the radio code and consume it
 	var/message_mode = parse_message_mode(message, "headset")
